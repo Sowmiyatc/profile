@@ -2,13 +2,15 @@
 
 ## User prompt (latest)
 
-> Verify this issue exists and fix it:
->
-> The `copyEmail` function schedules a `setTimeout` to reset the `copied` state, but doesn't track or cancel previous timeouts. If the user clicks the button multiple times within the 2-second window, multiple timeouts accumulate. The `copied` message will disappear based on the first click's timeout, not the most recent one, resulting in incorrect feedback timing after rapid clicks.
+> i want to publish this to github page
 
 ## Decisions
 
-- **Contact copy feedback (`ContactSection.tsx`):** `copyResetTimeoutRef` stores the pending reset timer; each successful copy **clears** the previous timeout before scheduling a new 2s reset so **Copied** always clears **2s after the latest** click. **useEffect** cleanup clears on unmount. On clipboard **failure**, any pending timeout is cleared and **`copied`** is false.
+- **GitHub Pages:** Workflow **`.github/workflows/deploy-pages.yml`** — on push to **`main`**, **`npm ci`** + **`npm run build`**, then **`upload-pages-artifact`** + **`deploy-pages`**. Repo **Settings → Pages → Build and deployment** must use **GitHub Actions** (not “Deploy from branch”).
+- **Vite `base` (`vite.config.ts`):** In CI, **`GITHUB_REPOSITORY`** (set by Actions) drives **`/<repo>/`** so assets load under **`https://<user>.github.io/<repo>/`**. If repo name is **`<user>.github.io`**, **`base`** is **`/`** (user site at domain root). Local dev: unset env → **`base: '/'`**.
+- **Public URLs (`site.ts`):** **`resumePath`** and **`profileImage`** use **`import.meta.env.BASE_URL`** via **`publicAsset()`** so resume/photo work under a subpath.
+- **JSON-LD (`JsonLd.tsx`):** **`url`** uses **`origin + BASE_URL`** (trimmed) so the Person URL matches the deployed path.
+- **Contact copy feedback (`ContactSection.tsx`):** `copyResetTimeoutRef` clears/reschedules the **Copied** reset timeout; cleanup on unmount and on clipboard error.
 - **ContactSection file:** Was **0 bytes** (broken import); restored full section UI plus the timeout fix.
 - **Employer copy:** **`Cognizant Technology Solutions`** in **`site.ts`**, **`experience.ts`**, **`index.html`**, and relevant section subtitles.
 - **PSNA:** **`PSNA College of Engineering and Technology`** (lowercase **and**) in **`experience.ts`**; Experience section subtitle spells out the school name.
@@ -21,7 +23,7 @@
 - **Skill levels (`skills.ts`):** **Python** and **Power BI** at **70**.
 - **Languages & scripting (`skills.ts`):** **PySpark → SQL → Unix scripting → Python** (Python last).
 - **Experience tenure:** **`site.experienceTenure`** = **`5 years 7 months`**; summary uses **5 years and 7 months**.
-- **No GitHub on site;** projects **`md:grid-cols-2`**; LAN **`vite.config.ts`**; resume **`/Sowmiya_TC_Resume.pdf`**; contact email as in **`site.ts`**; LinkedIn + **`public/profile.png`**.
+- **No GitHub on site;** projects **`md:grid-cols-2`**; LAN **`vite.config.ts`**; resume + profile image via **`publicAsset()`**; contact email as in **`site.ts`**; LinkedIn + **`public/profile.png`**.
 - **Highlights:** `id="highlights"` — accomplishments + languages; in **`SECTION_IDS`** and **navbar**.
 - **Experience:** Cognizant Oct 2020—Present + PSNA BE ECE; expandable panels.
 - **Certifications:** DP-900 + Databricks DE Associate.
@@ -29,17 +31,19 @@
 
 ## Assistant response (latest)
 
-Confirmed **`ContactSection.tsx`** was empty (issue reproduced in the sense the prior implementation was gone). Restored the contact UI and fixed **`copyEmail`**: **`useRef<number | null>`** holds the **`window.setTimeout`** id; clear before each new schedule; clear on unmount and on copy error. **`npm run build`** passes.
+Added **GitHub Pages** deployment: **`.github/workflows/deploy-pages.yml`** (build artifact + **deploy-pages**). **`vite.config.ts`** sets **`base`** from **`GITHUB_REPOSITORY`** in CI (`/<repo>/`, or **`/`** for **`<user>.github.io`** repos). **`site.ts`** uses **`publicAsset()`** for **`resumePath`** / **`profileImage`**; **`JsonLd`** Person **`url`** includes the subpath. After the first successful workflow run, set the repo **Pages** source to **GitHub Actions** if prompted; the site URL will be **`https://<github-username>.github.io/profile/`** for repo **`profile`**. **`npm run build`** passes locally with and without **`GITHUB_REPOSITORY`**.
 
 ## Implementation notes
 
-- Resume: **`public/Sowmiya_TC_Resume.pdf`** — `site.resumePath` → `/Sowmiya_TC_Resume.pdf` (hero + contact download).
+- **GitHub Pages:** After the first deploy, open **Settings → Pages** and set **Build and deployment** source to **GitHub Actions** (once). Live URL: **`https://<user>.github.io/<repo>/`** (e.g. **`https://sowmiyatc.github.io/profile/`** if the repo is **`Sowmiyatc/profile`**).
+- Resume: **`public/Sowmiya_TC_Resume.pdf`** — `site.resumePath` uses **`publicAsset()`** (works with **`base`** on GitHub Pages).
 - **LAN dev:** Run `npm run dev`; use the **Network** URL from the terminal on phones/other PCs (same subnet). If the page does not load, allow **Node.js** through Windows Firewall for private networks.
 - Add `credentialUrl` on certification rows when you have verify links.
 - PSNA entry uses **Degree program** for dates until you add graduation year.
 
 ## Changelog
 
+- **2026-05-12:** GitHub Pages: **`deploy-pages`** workflow, Vite **`base`** from **`GITHUB_REPOSITORY`**, **`publicAsset`** + JSON-LD URL (`vite.config.ts`, `site.ts`, `JsonLd.tsx`, `.github/workflows/deploy-pages.yml`).
 - **2026-05-12:** Contact: **`copyEmail`** clears/reschedules reset timeout; restore **`ContactSection.tsx`** (file had been empty).
 - **2026-05-12:** Review follow-through: **Cognizant Technology Solutions**; PSNA **and**; nav **Highlights**; section title case; Skills self-assessment copy; Contact LinkedIn column; **`NameFallback`** hero/about (`site.ts`, `experience.ts`, `index.html`, `AboutSection`, `HeroSection`, `HighlightsSection`, `ExperienceSection`, `ProjectsSection`, `SkillsSection`, `ContactSection`, `useActiveSection.ts`, `NameFallback.tsx`).
 - **2026-05-12:** Footer: removed period after copyright name (`Footer.tsx`).

@@ -6,7 +6,9 @@ export function JsonLd() {
     "@type": "Person",
     name: site.name,
     jobTitle: site.role,
-    ...(typeof window !== "undefined" ? { url: window.location.origin } : {}),
+    ...(typeof window !== "undefined"
+      ? { url: `${window.location.origin}${import.meta.env.BASE_URL}`.replace(/\/+$/, "") }
+      : {}),
     sameAs: [site.linkedin],
     email: site.email,
   };
