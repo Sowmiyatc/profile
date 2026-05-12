@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" rx="24" fill="#111827"/>
+  <rect x="60" y="80" width="680" height="12" rx="6" fill="#3B82F6" opacity="0.5"/>
+  <rect x="60" y="120" width="520" height="12" rx="6" fill="#8B5CF6" opacity="0.45"/>
+  <text x="400" y="280" text-anchor="middle" fill="#F9FAFB" font-family="system-ui" font-size="22">Membership</text>
+</svg>
